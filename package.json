@@ -1,6 +1,6 @@
 {
   "name": "vibe-check-mcp",
-  "version": "0.2.0",
+  "version": "0.0.1",
   "description": "Vibe Check MCP for preventing cascading errors in AI-assisted coding through metacognitive pattern interrupts",
   "main": "build/index.js",
   "type": "module",
@@ -17,6 +17,8 @@
     "@google/genai": "^1.6.0",
     "@modelcontextprotocol/sdk": "1.13.1",
     "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
+    "crawlee": "^3.13.8",
     "dotenv": "^16.5.0",
     "simple-lru-cache": "^0.0.2",
     "zod": "^3.25.67"
@@ -39,14 +41,14 @@
     "ai",
     "learnlm"
   ],
-  "author": "PV Bhat",
+  "author": "ssdeanx",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PV-Bhat/vibe-check-mcp-server.git"
+    "url": "https://github.com/ssdeanx/vibe-check-mcp-server.git"
   },
   "bugs": {
-    "url": "https://github.com/PV-Bhat/vibe-check-mcp-server/issues"
+    "url": "https://github.com/ssdeanx/vibe-check-mcp-server/issues"
   },
-  "homepage": "https://github.com/PV-Bhat/vibe-check-mcp-server#readme",
+  "homepage": "https://github.com/ssdeanx/vibe-check-mcp-server#readme",
   "license": "MIT"
 }

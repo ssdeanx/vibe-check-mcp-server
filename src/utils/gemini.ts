@@ -155,9 +155,9 @@ When pointing out patterns, use phrases like:
         ],
         config: {
           temperature: 0.3,
-          topP: 0.8,
+          topP: 0.9,
           topK: 40,
-          maxOutputTokens: 8192,
+          maxOutputTokens: 12000,
           // Enable advanced Gemini 2.5 features:
           thinkingConfig: {
             thinkingBudget: -1, // dynamic thinking for best reasoning

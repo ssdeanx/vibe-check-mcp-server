@@ -35,8 +35,10 @@ export interface VibeCheckOutput {
  */
 export async function vibeCheckTool(input: VibeCheckInput): Promise<VibeCheckOutput> {
   try {
+    const { plan, userRequest, thinkingLog, availableTools, focusAreas, previousAdvice, phase, confidence } = input;
+
     // Validate required userRequest is present and not empty
-    if (!input.userRequest || input.userRequest.trim() === '') {
+    if (!userRequest || userRequest.trim() === '') {
       throw new Error('FULL user request is required to prevent bias and ensure alignment');
     }
     
@@ -45,17 +47,17 @@ export async function vibeCheckTool(input: VibeCheckInput): Promise<VibeCheckOut
     
     // Get metacognitive questions from Gemini with dynamic parameters
     const response = await getMetacognitiveQuestions({
-      plan: input.plan,
-      userRequest: input.userRequest,
-      thinkingLog: input.thinkingLog,
-      availableTools: input.availableTools,
-      focusAreas: input.focusAreas,
+      plan,
+      userRequest,
+      thinkingLog,
+      availableTools,
+      focusAreas,
       mistakeHistory,
       
       // Include new dynamic parameters
-      previousAdvice: input.previousAdvice,
-      phase: input.phase,
-      confidence: input.confidence
+      previousAdvice,
+      phase,
+      confidence
     });
     
     return {

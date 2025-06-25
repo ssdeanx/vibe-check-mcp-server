@@ -3,6 +3,7 @@ export interface VibeDistillInput {
   plan: string;
   userRequest: string; // Now required, not optional
   sessionId?: string;
+  instructions?: string; // Added to support critical instructions
 }
 
 export interface VibeDistillOutput {
@@ -19,21 +20,23 @@ export interface VibeDistillOutput {
  */
 export async function vibeDistillTool(input: VibeDistillInput): Promise<VibeDistillOutput> {
   try {
+    const { userRequest } = input;
+
     // Validate required parameters
     if (!input.plan) {
       throw new Error('Plan is required');
     }
     
-    if (!input.userRequest || input.userRequest.trim() === '') {
+    if (!userRequest || userRequest.trim() === '') {
       throw new Error('FULL user request is required for proper distillation and alignment');
     }
     
     // Prepare the input plan for processing
     const originalPlan = input.plan.trim();
-    const userRequest = input.userRequest.trim();
+    const userRequestTrimmed = userRequest.trim();
     
     // Create instructions for the distillation process
-    const instructions = `
+    const instructionsText = `
 Distill the provided plan into its most essential form.
 
 1. Extract only the core actions and decisions
@@ -45,13 +48,11 @@ PLAN TO DISTILL:
 ${originalPlan}
 
 USER REQUEST:
-${userRequest}
+${userRequestTrimmed}
 `;
-
-    // In a real implementation, we would use an LLM to distill the plan
     // For this simplified implementation, we'll use a basic approach
     
-    const distilledPlan = createSimpleDistillation(originalPlan, userRequest);
+    const distilledPlan = createSimpleDistillation(originalPlan, userRequestTrimmed, instructionsText);
     
     // Simple rationale
     const rationale = "This distillation focuses on core actions while removing unnecessary complexity.";
@@ -72,12 +73,14 @@ ${userRequest}
 /**
  * Simple function to create a basic distillation of a plan
  */
-function createSimpleDistillation(plan: string, userRequest: string): string {
+function createSimpleDistillation(plan: string, userRequest: string, distillationInstructions: string): string {
   // Create a simple structure
   let distilled = "";
   
   // Add a header
   distilled += "# Distilled Plan\n\n";
+  distilled += "## Distillation Instructions\n";
+  distilled += distillationInstructions + "\n\n";
   
   // Add essential elements section
   distilled += "## Essential Actions\n";

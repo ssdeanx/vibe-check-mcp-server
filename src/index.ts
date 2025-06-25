@@ -17,10 +17,16 @@ import {
 import { vibeCheckTool, VibeCheckInput, VibeCheckOutput } from './tools/vibeCheck.js';
 import { vibeDistillTool, VibeDistillInput, VibeDistillOutput } from './tools/vibeDistill.js';
 import { vibeLearnTool, VibeLearnInput, VibeLearnOutput } from './tools/vibeLearn.js';
+import { vibePlanningTool, VibePlanningInput, VibePlanningOutput } from './tools/vibePlanning.js';
+
+import { vibeMentalModelsTool, VibeMentalModelsInput, VibeMentalModelsOutput } from './tools/vibeMentalModels.js';
 
 // Import Gemini integration
 import { initializeGemini } from './utils/gemini.js';
 import { STANDARD_CATEGORIES } from './utils/storage.js';
+
+
+
 
 // Validate API key at startup
 const apiKey = process.env.GEMINI_API_KEY;
@@ -163,6 +169,60 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ["mistake", "category", "solution"]
         }
+      },
+      {
+        name: "vibe_planning",
+        description: "Step-by-step planning tool that breaks down complex goals into actionable steps",
+        inputSchema: {
+          type: "object",
+          properties: {
+            goal: {
+              type: "string",
+              description: "The goal to plan for"
+            },
+            context: {
+              type: "string",
+              description: "Optional context for the planning"
+            },
+            constraints: {
+              type: "string",
+              description: "Optional constraints for the planning"
+            },
+            thinkingBudget: {
+              type: "number",
+              description: "Optional: controls reasoning depth if handled by server"
+            },
+            sessionId: {
+              type: "string",
+              description: "Optional session ID for state management"
+            }
+          },
+          required: ["goal"]
+        }
+      },
+      {
+      },
+      {
+        name: "vibe_mental_models",
+        description: "Tool for understanding and applying mental models",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "The query for the mental models tool (e.g., 'explain first principles', 'suggest mental models')"
+            },
+            context: {
+              type: "string",
+              description: "Optional context for the mental models query"
+            },
+            sessionId: {
+              type: "string",
+              description: "Optional session ID for state management"
+            }
+          },
+          required: ["query"]
+        }
       }
     ]
   };
@@ -251,7 +311,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: "text",
-            text: result.distilledPlan
+            text: formatVibeDistillOutput(result)
           }
         ]
       };
@@ -290,13 +350,77 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         ]
       };
     }
-    
-    default:
+
+    case "vibe_planning": {
+      if (!args || typeof args.goal !== 'string') {
+        console.error("Invalid vibe_planning request: missing goal");
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          'Invalid input: goal is required and must be a string'
+        );
+      }
+
+      const input: VibePlanningInput = {
+        goal: args.goal,
+        context: typeof args.context === 'string' ? args.context : undefined,
+        constraints: Array.isArray(args.constraints) ? args.constraints.filter((c: any) => typeof c === 'string') : (typeof args.constraints === 'string' ? [args.constraints] : undefined),
+        thinkingBudget: typeof args.thinkingBudget === 'number' ? args.thinkingBudget : undefined,
+        sessionId: typeof args.sessionId === 'string' ? args.sessionId : undefined,
+        includeHistoricalMistakes: typeof args.includeHistoricalMistakes === 'boolean' ? args.includeHistoricalMistakes : undefined
+      };
+
+      console.error("Executing vibe_planning tool...");
+      const result = await vibePlanningTool(input);
+      console.error("vibe_planning execution complete");
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: formatVibePlanningOutput(result)
+          }
+        ]
+      };
+    }
+
+    case "vibe_mental_models": {
+      if (!args || typeof args.query !== 'string') {
+        console.error("Invalid vibe_mental_models request: missing query");
+        throw new McpError(
+          ErrorCode.InvalidParams,
+          'Invalid input: query is required and must be a string'
+        );
+      }
+
+      const input: VibeMentalModelsInput = {
+        query: args.query,
+        context: typeof args.context === 'string' ? args.context : undefined,
+        sessionId: typeof args.sessionId === 'string' ? args.sessionId : undefined,
+        thinkingLog: typeof args.thinkingLog === 'string' ? args.thinkingLog : undefined,
+        includeHistoricalMistakes: typeof args.includeHistoricalMistakes === 'boolean' ? args.includeHistoricalMistakes : undefined
+      };
+
+      console.error("Executing vibe_mental_models tool...");
+      const result = await vibeMentalModelsTool(input);
+      console.error("vibe_mental_models execution complete");
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: formatVibeMentalModelsOutput(result)
+          }
+        ]
+      };
+    }
+
+    default: {
       console.error(`Unknown tool requested: ${name}`);
       throw new McpError(
         ErrorCode.MethodNotFound,
         `Unknown tool: ${name}`
       );
+    }
   }
 });
 
@@ -322,19 +446,19 @@ function formatVibeCheckOutput(result: VibeCheckOutput): string {
  */
 function formatVibeLearnOutput(result: VibeLearnOutput): string {
   let output = '';
-  
+
   if (result.added) {
     output += `✅ Pattern logged successfully (category tally: ${result.currentTally})`;
   } else {
     output += '❌ Failed to log pattern';
   }
-  
+
   // Add top categories section
   if (result.topCategories && result.topCategories.length > 0) {
     output += '\n\n## Top Pattern Categories\n';
     for (const category of result.topCategories) {
       output += `\n### ${category.category} (${category.count} occurrences)\n`;
-      
+
       // Show the most recent example
       if (category.recentExample) {
         output += `Most recent: "${category.recentExample.mistake}"\n`;
@@ -342,8 +466,57 @@ function formatVibeLearnOutput(result: VibeLearnOutput): string {
       }
     }
   }
-  
+
   return output;
+}
+
+/**
+ * Format vibe planning output as markdown
+ */
+function formatVibePlanningOutput(result: VibePlanningOutput): string {
+  let output = '## Vibe Planning Result\n\n';
+  output += `**Summary:** ${result.summary}\n\n`;
+  output += '### Plan Steps:\n';
+  result.plan.forEach((step, index) => {
+    output += `${index + 1}. ${step.step}\n`;
+    if (step.rationale) {
+      output += `   - Rationale: ${step.rationale}\n`;
+    }
+    if (step.risks && step.risks.length > 0) {
+      output += `   - Risks: ${step.risks.join(', ')}\n`;
+    }
+  });
+  if (result.thoughts) {
+    output += `\n**Thoughts:** ${result.thoughts}\n`;
+  }
+  return output;
+}
+
+/**
+ * Format vibe mental models output as markdown
+ */
+function formatVibeMentalModelsOutput(result: VibeMentalModelsOutput): string {
+  let output = '## Vibe Mental Models Result\n\n';
+  if (result.explanation) {
+    output += `**Explanation:** ${result.explanation}\n\n`;
+  }
+  if (result.suggestions && result.suggestions.length > 0) {
+    output += '### Suggestions:\n';
+    result.suggestions.forEach((suggestion, index) => {
+      output += `${index + 1}. ${suggestion}\n`;
+    });
+  }
+  if (result.thoughts) {
+    output += `\n**Thoughts:** ${result.thoughts}\n`;
+  }
+  return output;
+}
+
+/**
+ * Format vibe distill output as markdown
+ */
+function formatVibeDistillOutput(result: VibeDistillOutput): string {
+  return `## Vibe Distill Result\n\n**Distilled Plan:**\n${result.distilledPlan}`;
 }
 
 /**
@@ -375,3 +548,5 @@ main().catch((error) => {
   console.error("Server startup error:", error);
   process.exit(1);
 });
+
+

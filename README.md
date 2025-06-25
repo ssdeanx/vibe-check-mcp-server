@@ -1,16 +1,13 @@
-# 🧠 Vibe Check MCP
+# 🧠 Vibe Check MCP Server
 
-<img src="https://github.com/PV-Bhat/vibe-check-mcp-server/blob/main/Attachments/vibelogo.png" alt="Logo" width="150" height="150">
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](https://github.com/PV-Bhat/vibe-check-mcp-server)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Pattern Status](https://img.shields.io/badge/pattern-interrupted-red)](https://github.com/PV-Bhat/vibe-check-mcp-server)
-[![smithery badge](https://smithery.ai/badge/@PV-Bhat/vibe-check-mcp-server)](https://smithery.ai/server/@PV-Bhat/vibe-check-mcp-server)
-[![Vibe Check MCP Server](https://img.shields.io/badge/vibecheck%20-mcp.so-blue)](https://mcp.so/server/vibe-check-mcp-server/PV-Bhat)
-[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/6dd1b68e-85aa-40c8-83fb-f746653aca4f)
+## 🚀 Project Overview
 
-Also find Vibecheck on: [mcpservers.org](https://github.com/wong2/awesome-mcp-servers?tab=readme-ov-file#community-servers), [Glama.ai](https://glama.ai/mcp/servers/@PV-Bhat/vibe-check-mcp-server/), [mcp.so](https://mcp.so/server/vibe-check-mcp-server/PV-Bhat)
-
+The `Vibe Check MCP Server` is a robust and extensible Model Context Protocol (MCP) server designed to provide advanced AI-driven tools for various tasks, including code analysis, planning, and mental model suggestions. Built with TypeScript, it integrates seamlessly with external AI systems to offer context-aware and actionable insights.
 
 _Your AI's inner rubber duck when it can't rubber duck itself._
 
@@ -18,19 +15,34 @@ _Your AI's inner rubber duck when it can't rubber duck itself._
 
 In the **"vibe coding"** era, AI agents now have incredible capabilities, but the question has now moved:
 
-from 
-> "Can my AI agent really do this **complex task**?" 
+from
+> "Can my AI agent really do this **complex task**?"
 
 to
- 
+
 > "Can my AI agent understand that I want to write a **simple program**, not an _infrastructure for a multi-billion dollar tech company_?"
 
-It provides the essential "Hold up... this ain't it" moment that AI agents don't currently have: a built in self-correcting oversight layer. It's the definitive Vibe Coder's sanity check MCP server: 
+It provides the essential "Hold up... this ain't it" moment that AI agents don't currently have: a built in self-correcting oversight layer. It's the definitive Vibe Coder's sanity check MCP server:
 
-- Prevent cascading errors in AI workflows by implementing strategic pattern interrupts. 
-- Uses tool call "Vibe Check" with LearnLM 1.5 Pro (Gemini API), fine-tuned for pedagogy and metacognition to enhance complex workflow strategy, and prevents tunnel vision errors.
+- Prevent cascading errors in AI workflows by implementing strategic pattern interrupts.
+- Uses tool call "Vibe Check" with Gemini 2.5 Pro (Gemini API), fine-tuned for pedagogy and metacognition to enhance complex workflow strategy, and prevents tunnel vision errors.
 - Implements "Vibe Distill" to encourage plan simplification, prevent over-engineering solutions, and minimize contextual drift in agents.
 - Self-improving feedback loops: Agents can log mistakes into "Vibe Learn" to improve semantic recall and help the oversight AI target patterns over time.
+- **Vibe Planning Tool**: Generates step-by-step plans for achieving goals, considering historical mistakes and extracted concerns from thinking logs.
+- This tool allows agents to break down complex goals into actionable steps, taking into account historical mistakes and extracted concerns from thinking logs.
+- Its main use is to break down complex goals into actionable steps, or to reframe goals into more achievable steps.
+- It can also be used to generate plans for achieving goals, considering historical mistakes and extracted concerns from thinking logs.
+- This allows agent to see the big picture, instead of getting lost in the details.
+  - **Context-Aware Planning**: Utilizes `src/utils/context-parser.ts` to parse thinking logs and extract potential concerns, integrating them into risk assessment for more robust plans.
+  - **Historical Mistake Consideration**: Leverages `src/utils/storage.ts` to fetch and incorporate insights from past mistakes, guiding future planning to avoid recurring issues.
+- **Vibe Mental Models Tool**: Provides actionable mental model suggestions based on user queries and context.
+- This tool allows agents to use mental models to understand and apply mental models to their work.
+- It can also be used to generate mental models for achieving goals, considering historical mistakes and extracted concerns from thinking logs.
+- This can help agents adapt to new situations and avoid common pitfalls.
+  - **Enhanced Suggestions**: Integrates `src/utils/context-parser.ts` to analyze thinking logs and inform mental model suggestions, making them more relevant and personalized.
+  - **Mistake-Driven Insights**: Utilizes `src/utils/storage.ts` to analyze historical mistakes and offer targeted mental model suggestions based on mistake categories.
+  - **Context-Aware Insights**: Integrates `src/utils/context-parser.ts` to analyze thinking logs and inform mental model suggestions, making them more relevant and personalized.
+  - **Historical Mistake Consideration**: Leverages `src/utils/storage.ts` to fetch and incorporate insights from past mistakes, guiding future planning to avoid recurring issues.
 
 **TLDR; Implement an agent fine-tuned to stop your agent and make it reconsider before it confidently implements something wrong.**
 
@@ -38,7 +50,7 @@ It provides the essential "Hold up... this ain't it" moment that AI agents don't
 
 In the vibe coding movement, we're all using LLMs to generate, refactor, and debug our code. But these models have a critical flaw: once they start down a reasoning path, they'll keep going even when the path is clearly wrong.
 
-```
+```txt
 You: "Parse this CSV file"
 
 AI: "First, let's implement a custom lexer/parser combination that can handle arbitrary 
@@ -52,7 +64,10 @@ This **pattern inertia** leads to:
 - 🔄 **Tunnel vision**: Your agent gets stuck in one approach, unable to see alternatives
 - 📈 **Scope creep**: Simple tasks gradually evolve into enterprise-scale solutions
 - 🔌 **Overengineering**: Adding layers of abstraction to problems that don't need them
+- 📊 **Overthinking**: Your agent spends too much time reasoning about a problem, unable to see the bigger picture
 - ❓ **Misalignment**: Solving an adjacent but different problem than the one you asked for
+- 🤔 **Misunderstanding**: Misinterpreting the user's intent or requirements
+- 🤯 **Miscommunication**: Miscommunication between the user and the agent
 
 ## Features: Metacognitive Oversight Tools
 
@@ -93,6 +108,48 @@ vibe_learn({
   "solution": "..."              // How it was corrected
 })
 ```
+
+### 🧠 vibe_mental_models
+
+**Mental model suggestion tool** that provides actionable mental model suggestions based on user queries and context. It enhances suggestions by:
+
+```javascript
+vibe_mental_models({
+  "query": "...",                // The query for the mental models tool (e.g., 'explain first principles', 'suggest mental models')
+  "context": "..."               // Optional context for the mental models query
+})
+```
+
+### 🗺️ vibe_planning
+
+**Step-by-step planning tool** that breaks down complex goals into actionable steps:
+
+```javascript
+vibe_planning({
+  "goal": "...",                 // The goal to plan for
+  "context": "...",              // Optional context for the planning
+  "constraints": "...",          // Optional constraints for the planning
+  "thinkingBudget": 10,          // Optional: controls reasoning depth if handled by server
+})
+```
+
+## ✨ New Tools and Integrations
+
+In addition to the core metacognitive oversight tools, Vibe Check MCP Server now includes advanced tools for planning and mental model suggestions, leveraging sophisticated context parsing and historical data storage.
+
+### Vibe Mental Models
+
+The `vibe_mental_models` tool provides actionable mental model suggestions based on user queries and context. It enhances suggestions by:
+
+- **Context-Aware Insights**: Integrates `src/utils/context-parser.ts` to analyze thinking logs and inform mental model suggestions, making them more relevant and personalized.
+- **Mistake-Driven Guidance**: Utilizes `src/utils/storage.ts` to analyze historical mistakes and offer targeted mental model suggestions based on mistake categories, helping agents learn from past errors.
+
+### Vibe Planning
+
+The `vibe_planning` tool generates step-by-step plans for achieving goals, incorporating historical mistakes and extracted concerns from thinking logs. Key enhancements include:
+
+- **Risk-Aware Planning**: Leverages `src/utils/context-parser.ts` to parse thinking logs and extract potential concerns, integrating them into risk assessment for more robust and resilient plans.
+- **Historical Learning**: Fetches and incorporates insights from past mistakes using `src/utils/storage.ts`, guiding future planning to avoid recurring issues and improve strategic decision-making.
 
 ### Vibe Check in Action
 
@@ -155,7 +212,7 @@ Add to your `claude_desktop_config.json`:
 
 Create a `.env` file in the project root:
 
-```
+```bash
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
@@ -163,7 +220,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 For effective pattern interrupts, include these instructions in your system prompt:
 
-```
+```bash
 As an autonomous agent, you will:
 
 1. Treat vibe_check as a critical pattern interrupt mechanism
@@ -180,6 +237,8 @@ As an autonomous agent, you will:
 | 🛑 **vibe_check** | When your agent starts explaining blockchain fundamentals for a todo app |
 | ⚓ **vibe_distill** | When your agent's plan has more nested bullet points than your entire tech spec |
 | 🔄 **vibe_learn** | After you've manually steered your agent back from the complexity abyss |
+| 🧠 **vibe_mental_models** | When your agent needs to understand and apply mental models |
+| 🗺️ **vibe_planning** | When your agent needs to generate a step-by-step plan for achieving a goal |
 
 ## API Reference
 
@@ -202,6 +261,12 @@ Vibe Check implements a dual-layer metacognitive architecture based on recursive
 
 5. **Recursive Feedback Loops**: All observed missteps must be stored and leveraged to build longitudinal failure models that improve interrupt efficacy.
 
+6. **Context-Aware Planning**: Leverages `src/utils/context-parser.ts` to parse thinking logs and extract potential concerns, integrating them into risk assessment for more robust plans.
+
+7. **Historical Mistake Consideration**: Leverages `src/utils/storage.ts` to fetch and incorporate insights from past mistakes, guiding future planning to avoid recurring issues.
+
+8. **Mental Model Integration**: Leverages `src/utils/context-parser.ts` to parse thinking logs and extract potential concerns, integrating them into risk assessment for more robust plans.
+
 For more details on the underlying design principles, see [Philosophy](./docs/philosophy.md).
 </details>
 
@@ -215,18 +280,53 @@ For more details on the underlying design principles, see [Philosophy](./docs/ph
 
 ---
 
-
 ![V3](https://github.com/PV-Bhat/vibe-check-mcp-server/blob/main/Attachments/vc3.png)
 
 ---
 
-
 ![V4](https://github.com/PV-Bhat/vibe-check-mcp-server/blob/main/Attachments/vc4.png)
-
 
 ## Verifications
 
 <img src="https://mseep.net/pr/pv-bhat-vibe-check-mcp-server-badge.png" alt="Logo" width="100" height="100">
+
+```mermaid
+graph TD
+
+    594["Parent Process / IDE<br>External Actor"]
+    599["Local Log Files<br>Filesystem"]
+    606["User<br>External Actor"]
+    607["Local File System<br>Host Storage"]
+    subgraph 592["External Systems"]
+        598["AI APIs<br>Google Gemini, etc."]
+    end
+    subgraph 593["Vibe Check MCP Server<br>Node.js / TypeScript"]
+        595["Main Server<br>TypeScript"]
+        596["Agent Tools<br>TypeScript"]
+        597["Utility Services<br>Code Directory"]
+        %% Edges at this level (grouped by source)
+        595["Main Server<br>TypeScript"] -->|dispatches to| 596["Agent Tools<br>TypeScript"]
+        596["Agent Tools<br>TypeScript"] -->|uses| 597["Utility Services<br>Code Directory"]
+    end
+    subgraph 600["External Systems"]
+        605["AI APIs<br>Google Gemini, etc."]
+    end
+    subgraph 601["Vibe Check MCP Server<br>TypeScript / Node.js"]
+        602["Tool Server<br>TypeScript"]
+        603["Core Tools<br>TypeScript"]
+        604["Utility Services<br>TypeScript"]
+        %% Edges at this level (grouped by source)
+        602["Tool Server<br>TypeScript"] -->|delegates to| 603["Core Tools<br>TypeScript"]
+        603["Core Tools<br>TypeScript"] -->|uses| 604["Utility Services<br>TypeScript"]
+    end
+    %% Edges at this level (grouped by source)
+    594["Parent Process / IDE<br>External Actor"] -->|invokes via stdio| 595["Main Server<br>TypeScript"]
+    597["Utility Services<br>Code Directory"] -->|calls| 598["AI APIs<br>Google Gemini, etc."]
+    597["Utility Services<br>Code Directory"] -->|reads/writes to| 599["Local Log Files<br>Filesystem"]
+    606["User<br>External Actor"] -->|invokes via stdio| 602["Tool Server<br>TypeScript"]
+    604["Utility Services<br>TypeScript"] -->|calls| 605["AI APIs<br>Google Gemini, etc."]
+    604["Utility Services<br>TypeScript"] -->|reads/writes| 607["Local File System<br>Host Storage"]
+```
 
 ## Documentation
 
