@@ -4,11 +4,7 @@ export interface VibeMentalModelsInput {
   query: string;
   context?: string;
   sessionId?: string;
-  includeHistoricalMistakes?: boolean; // New field to optionally include historical mistakes
-}
-
-export interface VibeMentalModelsInput {
-  query: string;
+  includeHistoricalMistakes?: boolean;
   thinkingLog?: string;
 }
 
@@ -25,32 +21,97 @@ import { parseThinking, ThinkingContext } from '../utils/context-parser.js';
  * The vibe_mental_models tool helps in understanding, suggesting, and applying mental models.
  * This tool provides actionable insights and guidance on various mental models.
  */
+
+// Define mental model registry
+const MENTAL_MODEL_REGISTRY: Record<string, string> = {
+  'first principles': '**First Principles Thinking:** Break problems to fundamental truths. *Action: Ask \"Why?\" 5 times to reach core truths, then rebuild solutions.*',
+  'inversion': '**Inversion:** Think backwards from failure. *Action: Ask \"What would guarantee failure?\" then avoid those paths.*',
+  "occam's razor": "**Occam's Razor:** When faced with competing hypotheses, choose the simplest explanation that fits the facts. This principle promotes simplicity and clarity by removing unnecessary complexity.",
+  'systems thinking': '**Systems Thinking:** Understand how interconnected parts influence a whole system. This approach helps in grasping complex interactions and anticipating unintended consequences.',
+  'second-order thinking': '**Second-Order Thinking:** Consider the consequences of consequences. *Action: Always ask \"And then what?\" to anticipate ripple effects.*',
+  'opportunity cost': '**Opportunity Cost:** The value of the next best alternative that must be foregone when making a choice. Understanding this helps in making more informed decisions by weighing trade-offs.',
+  'margin of safety': '**Margin of Safety:** Building in a buffer for errors, unknowns, or adverse events. This principle is crucial in engineering, finance, and planning to reduce risk.',
+  'feedback loops': '**Feedback Loops:** A process where outputs of a system are routed back as inputs, influencing future outputs. Can be positive (amplifying) or negative (stabilizing).',
+  'pareto principle': '**Pareto Principle (80/20 Rule):** States that roughly 80% of effects come from 20% of causes. Useful for prioritizing efforts to maximize impact.',
+  'compounding': '**Compounding:** The process of generating returns on previous returns, leading to exponential growth. Applies to finance, knowledge, and skills.',
+  'probabilistic thinking': '**Probabilistic Thinking:** Estimate likelihoods of outcomes and make decisions based on probability. *Action: Assign rough probabilities to possible outcomes, then focus on high-probability/high-impact scenarios.*',
+  "hanlon's razor": "**Hanlon's Razor:** Never attribute to malice what can be adequately explained by neglect or incompetence. *Action: Assume good faith first, especially when interpreting others' actions.*",
+  'Scientific Method': '**Scientific Method:** Formulate hypotheses and test them systematically. *Action: When debugging, write down your assumptions and design experiments to test each one.*',
+  'Four Stages of Competence': '**Four Stages of Competence:** 1) Unconscious Incompetence, 2) Conscious Incompetence, 3) Conscious Competence, 4) Unconscious Competence. *Action: Identify your current stage to guide learning.*',
+  'Critical Thinking': '**Critical Thinking:** Question assumptions and evaluate evidence objectively. *Action: When debugging, challenge your initial assumptions about where the problem might be.*',
+  'Divide and Conquer': '**Divide and Conquer:** Break problems into smaller, manageable parts. *Action: Isolate components or subsystems to narrow down the source of issues.*',
+  'Binary Search': '**Binary Search:** Efficiently locate problems by repeatedly dividing the search space. *Action: Use in debugging to quickly isolate problematic code sections.*',
+  'Debugging Mindset': '**Debugging Mindset:** Adopt a structured approach: 1) Reproduce, 2) Isolate, 3) Analyze, 4) Fix, 5) Verify. *Action: Follow this workflow for systematic debugging.*',
+  'RAI Dashboard': '**RAI Dashboard:** Use Responsible AI tools to analyze model behavior. *Action: For ML systems, leverage tools like error analysis and feature importance.*',
+  'Convex Optimization': '**Convex Optimization:** Frame problems as convex optimization when possible for efficient solutions. *Action: Use for performance-critical systems where optimal solutions are required.*',
+  'Memory Profiling': '**Memory Profiling:** Use tools to identify memory allocation patterns and detect potential memory leaks. *Action: Regularly profile memory usage to prevent memory-related issues.*',
+};
+
+// Enhanced scenario-based matching with professional-grade coverage
+function findRelevantModels(query: string): string[] {
+  const lowerQuery = query.toLowerCase();
+  
+  // Debugging scenarios (expanded keywords)
+  if (/(debug|bug|error|issue|crashe?|leak|fault|defect|exception|trace|stack|memory|profiling)/.test(lowerQuery)) {
+    return [
+      'Systems Thinking: Analyze interactions between components',
+      'Root Cause Analysis: Identify underlying causes, not symptoms',
+      'Margin of Safety: Add buffers for unexpected failures',
+      'Binary Search: Efficiently isolate problematic code sections',
+      'Debugging Mindset: Follow structured 5-step workflow',
+      'Memory Profiling: Use tools to identify memory allocation patterns'
+    ];
+  }
+  // Performance scenarios (expanded keywords)
+  if (/(perf|slow|speed|optimization|bottleneck|latency|throughput|scalability)/.test(lowerQuery)) {
+    return [
+      'Pareto Principle (80/20 Rule): Focus on high-impact optimizations',
+      'Opportunity Cost: Consider tradeoffs of optimization efforts',
+      'Feedback Loops: Instrument metrics to measure optimization impact',
+      'Diminishing Returns: Recognize when optimization isn\'t worth effort'
+    ];
+  }
+  // Design scenarios (expanded keywords)
+  if (/(design|architect|structure|blueprint|model|pattern|framework)/.test(lowerQuery)) {
+    return [
+      'First Principles Thinking: Break down to fundamental truths',
+      'Inversion: Avoid worst-case scenarios from the start',
+      'Occam\'s Razor: Prefer simpler designs',
+      'Modularity: Build independent, interchangeable components'
+    ];
+  }
+  
+  // Fallback to keyword matching
+  const matchedModels = Object.keys(MENTAL_MODEL_REGISTRY).filter(model => 
+    lowerQuery.includes(model)
+  );
+  
+  return matchedModels.length > 0 ? matchedModels : [];
+}
+
+// Updated tool implementation
 export async function vibeMentalModelsTool(input: VibeMentalModelsInput): Promise<VibeMentalModelsOutput> {
   try {
-    // Validate input
-    if (!input.query) {
-      throw new Error('Query is required for mental models tool.');
-    }
-
-    const { query, context, includeHistoricalMistakes, thinkingLog } = input;
-
-    let thoughts = `Providing mental model guidance for query: "${query}".`;
-
-    if (thinkingLog) {
-      const parsedContext: ThinkingContext = parseThinking(thinkingLog);
-      if (parsedContext.potentialConcerns && parsedContext.potentialConcerns.length > 0) {
-        thoughts += ` Identified potential concerns from thinking log: ${parsedContext.potentialConcerns.join(', ')}.`;
+    if (!input.query) throw new Error('Query is required.');
+    
+    const lowerCaseQuery = input.query.toLowerCase();
+    let thoughts = `Providing mental model guidance for query: "${input.query}".`;
+    
+    // Process context and thinking log
+    if (input.context) thoughts += ` Context: "${input.context}".`;
+    if (input.thinkingLog) {
+      const parsedContext = parseThinking(input.thinkingLog);
+      if (parsedContext.potentialConcerns?.length) {
+        thoughts += ` Concerns: ${parsedContext.potentialConcerns.join(', ')}.`;
       }
     }
-    if (context) {
-      thoughts += ` Context provided: "${context}".`;
-    }
-
-    if (includeHistoricalMistakes) {
+    
+    // Handle historical mistakes
+    if (input.includeHistoricalMistakes) {
       try {
         const mistakes = await getMistakes();
         if (mistakes && Object.keys(mistakes).length > 0) {
-          thoughts += ` Historical mistakes considered.`;
+          thoughts += ' Historical mistakes considered.';
           const mistakeCategories = Object.keys(mistakes);
           const suggestedModels: string[] = [];
 
@@ -96,75 +157,59 @@ export async function vibeMentalModelsTool(input: VibeMentalModelsInput): Promis
           }
         } else {
           thoughts += ` No historical mistakes found.`;
+          return {
+            explanation: `No historical mistakes found for the given query: "${input.query}".`,
+            thoughts: thoughts
+          };
         }
-      } catch (error: any) {
-        thoughts += ` Error fetching historical mistakes: ${error.message}.`;
+      } catch (error: unknown) {
+        thoughts += ` Error fetching historical mistakes: ${(error as Error).message}.`;
+        return {
+          explanation: `An error occurred while fetching historical mistakes: ${(error as Error).message}`,
+          thoughts: thoughts
+        };
       }
     }
 
-    if (!input.query || input.query.trim() === '') {
-      // Default or 'suggest' behavior: provide a comprehensive list of mental models
+    // Handle different query types
+    if (!input.query.trim() || /list all|suggest|all mental models/i.test(input.query)) {
+      const GENERAL_EXPLANATION = `To effectively apply mental models:
+
+1. **Define**: Clearly state your problem/goal
+2. **Select**: Choose 1-3 relevant models (${Object.keys(MENTAL_MODEL_REGISTRY).slice(0,5).join(', ')}...)
+3. **Apply**: Use the model\'s lens to analyze
+4. **Synthesize**: Combine insights into action
+5. **Review**: Reflect on outcomes to improve
+
+Key models include:\n- ${Object.keys(MENTAL_MODEL_REGISTRY).join('\n- ')}`;
       return {
-        explanation: "To effectively leverage mental models, consider the following actionable strategies and common models:\n\n**General Strategy for Application:**\n1.  **Define the Problem:** Clearly articulate the challenge or decision at hand.\n2.  **Scan for Relevance:** Review various mental models and identify those that might offer a useful lens for your specific situation.\n3.  **Apply & Analyze:** Use the chosen model's framework to dissect the problem, asking the questions it prompts.\n4.  **Synthesize & Act:** Integrate insights from different models if beneficial, and formulate a robust plan or decision.\n\n**Key Mental Models & Their Actionable Use:**\n- **First Principles Thinking:** Break down complex problems to fundamental truths. *Action: Ask 'Why?' repeatedly to uncover core components, then rebuild solutions from scratch.*\n- **Inversion:** Think backward from undesired outcomes to identify and avoid pitfalls. *Action: Define worst-case scenarios, then list actions that lead to them, and avoid those actions.*\n- **Occam's Razor:** Choose the simplest explanation that fits the facts. *Action: When faced with multiple theories, favor the one with the fewest assumptions.*\n- **Systems Thinking:** Understand how interconnected parts influence a whole system. *Action: Map out system components and their interactions to predict ripple effects.*\n- **Second-Order Thinking:** Consider the consequences of consequences. *Action: Beyond immediate effects, anticipate future impacts and unintended side effects.*\n- **Opportunity Cost:** Recognize the value of the next best alternative foregone. *Action: Before making a choice, explicitly identify what you are giving up.*\n- **Margin of Safety:** Build in buffer for errors, unknowns, or adverse events. *Action: Always plan with a cushion, whether in time, resources, or assumptions.*\n- **Feedback Loops:** Understand how outputs re-enter a system as inputs. *Action: Identify positive (amplifying) and negative (stabilizing) loops in any process.*\n- **Pareto Principle (80/20 Rule):** Roughly 80% of effects come from 20% of causes. *Action: Identify the vital few inputs that produce the majority of results.*\n- **Compounding:** The process of generating returns on previous returns. *Action: Apply consistent, small efforts over time for disproportionately large long-term gains.*\n\nFor a concise definition of a specific model, query it directly (e.g., 'First Principles', 'Inversion', 'Occam\'s Razor').",
-        thoughts: thoughts
+        explanation: GENERAL_EXPLANATION,
+        thoughts
       };
-    } else if (input.query.toLowerCase().includes('first principles')) {
+    } 
+    
+    // Find relevant models using improved matching
+    const matchedModels = findRelevantModels(input.query);
+    
+    if (matchedModels.length > 0) {
+      const explanations = matchedModels.join('\n- ');
+      
       return {
-        explanation: "**First Principles Thinking:** Deconstruct a problem to its basic, irreducible components. Ask 'Why?' repeatedly until you reach fundamental truths. Then, build up solutions from these truths, rather than reasoning by analogy. This helps in innovation and solving complex problems from scratch. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for First Principles Thinking.'
-      };
-    } else if (input.query.toLowerCase().includes('inversion')) {
-      return {
-        explanation: "**Inversion:** Think backward from undesired outcomes to identify and avoid pitfalls. Instead of focusing on how to achieve a desired outcome, consider what would cause the opposite (undesired) outcome and then work to avoid it. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Inversion.'
-      };
-    } else if (input.query.toLowerCase().includes('occam\'s razor')) {
-      return {
-        explanation: "**Occam's Razor:** When faced with competing hypotheses, choose the simplest explanation that fits the facts. This principle promotes simplicity and clarity by removing unnecessary complexity. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Occam\'s Razor.'
-      };
-    } else if (input.query.toLowerCase().includes('systems thinking')) {
-      return {
-        explanation: "**Systems Thinking:** Understand how interconnected parts influence a whole system. This approach helps in grasping complex interactions and anticipating unintended consequences. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Systems Thinking.'
-      };
-    } else if (input.query.toLowerCase().includes('second-order thinking')) {
-      return {
-        explanation: "**Second-Order Thinking:** Look beyond immediate effects to anticipate future impacts and ripple effects. This involves considering the consequences of consequences. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Second-Order Thinking.'
-      };
-    } else if (input.query.toLowerCase().includes('opportunity cost')) {
-      return {
-        explanation: "**Opportunity Cost:** The value of the next best alternative that must be foregone when making a choice. Understanding this helps in making more informed decisions by weighing trade-offs. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Opportunity Cost.'
-      };
-    } else if (input.query.toLowerCase().includes('margin of safety')) {
-      return {
-        explanation: "**Margin of Safety:** Building in a buffer for errors, unknowns, or adverse events. This principle is crucial in engineering, finance, and planning to reduce risk. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Margin of Safety.'
-      };
-    } else if (input.query.toLowerCase().includes('feedback loops')) {
-      return {
-        explanation: "**Feedback Loops:** A process where outputs of a system are routed back as inputs, influencing future outputs. Can be positive (amplifying) or negative (stabilizing). For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Feedback Loops.'
-      };
-    } else if (input.query.toLowerCase().includes('pareto principle') || input.query.toLowerCase().includes('80/20 rule')) {
-      return {
-        explanation: "**Pareto Principle (80/20 Rule):** States that roughly 80% of effects come from 20% of causes. Useful for prioritizing efforts to maximize impact. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Pareto Principle.'
-      };
-    } else if (input.query.toLowerCase().includes('compounding')) {
-      return {
-        explanation: "**Compounding:** The process of generating returns on previous returns, leading to exponential growth. Applies to finance, knowledge, and skills. For more, see the general suggestions.",
-        thoughts: 'Provided concise definition for Compounding.'
-      };
-    } else {
-      return {
-        explanation: `No specific mental model found for "${input.query}" in the current knowledge base. Consider refining your query or viewing the general suggestions for a comprehensive list.`, 
-        thoughts: 'No specific mental model matched the query. Suggesting refinement or general list.'
+        explanation: `For your scenario, apply these mental models:\n- ${explanations}`,
+        thoughts: `Found ${matchedModels.length} relevant models for your scenario.`
       };
     }
+    
+    // Fallback for unknown models
+    return {
+      explanation: `No specific mental model found for "${input.query}". Try "list all mental models" for options.`,
+      thoughts: 'No specific match. Suggesting general list.'
+    };
+    
   } catch (error) {
-    throw error;
+    return {
+      explanation: `Error: ${(error as Error).message}`,
+      thoughts: 'Processing error occurred.'
+    };
   }
 }

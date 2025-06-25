@@ -38,3 +38,11 @@ temp/
 
 # Local configuration
 .npmrc
+
+.windsurfrules
+.specstory/**/*.md
+.specstory/**/*.specstory
+*.specstory
+.github/
+.github/*
+.gitignore
