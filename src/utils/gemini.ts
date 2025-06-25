@@ -5,8 +5,8 @@ import axios from 'axios';
 let genAI: GoogleGenAI;
 let apiKey: string;
 
-// Use Gemini 2.5 Pro for advanced reasoning
-const MODEL_ID = 'gemini-2.5-pro';
+// Use Gemini 2.5 Flash Lite for advanced reasoning
+const MODEL_ID = 'gemini-2.5-flash-lite-preview-06-17';
 
 // Initialize the Gemini API client
 export function initializeGemini(key: string): void {
@@ -157,7 +157,7 @@ When pointing out patterns, use phrases like:
           temperature: 0.3,
           topP: 0.9,
           topK: 40,
-          maxOutputTokens: 12000,
+          maxOutputTokens: 64000,
           // Enable advanced Gemini 2.5 features:
           thinkingConfig: {
             thinkingBudget: -1, // dynamic thinking for best reasoning
